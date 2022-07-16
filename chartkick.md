@@ -19,3 +19,6 @@ and it seems every chart should be on following format
 ]
 ```
 
+### Rails Helpers
+
+The main goal of this gem is providing easy rails helpers to render the chart
