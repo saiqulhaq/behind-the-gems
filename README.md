@@ -10,6 +10,8 @@ Class call graph: https://github.com/mvidner/code-explorer
 
 Flowchart in markdown: https://mermaid-js.github.io/mermaid/#/flowchart
 
+Test mermaid js: https://mermaid.live/
+
 # Gem list
 
 1. [Chartkick](/chartkick.md)
