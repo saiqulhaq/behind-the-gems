@@ -32,13 +32,16 @@ hijacked methods are:
 * :exec_cache
 * :transaction
 
+It does act like Kubernetes control plane, manages the database servers  
+when a server is not responding or responding with errors, then Makara will blacklist it for X seconds, depends on the configuration
+
 # What I've learned
 
 1. Main ActiveRecord's methods are above hijacked methods, even for all adapters.
 2. Ruby's `|=` assignment operator. Example usage:
 
 ```ruby
-   self.hijack_methods |= method_names
+self.hijack_methods |= method_names
 ```
 it means Bitwise OR assignment.
 
@@ -63,47 +66,29 @@ irb(main):007:0> as |= [1]
 ```
 so it will make a unique array
 
-3. asdasd
+3. Array splat operator works on `case` statement
 
-# Diagram
+example:
 
-```mermaid
-classDiagram
+```ruby
+  def harsh_errors
+    [
+      'ActiveRecord::RecordNotUnique',
+      'ActiveRecord::InvalidForeignKey',
+      'Makara::Errors::BlacklistConnection' 
+    ]
+  end
 
-    Makara__Strategies__Abstract <|-- Makara__Strategies__PriorityFailover
-    Makara__Strategies__Abstract <|-- Makara__Strategies__RoundRobin
-    Makara__Strategies__Abstract <|-- Makara__Strategies__ShardAware
-
-    class Makara__ConnectionWrapper {
-        # for every connection to makara DB, it's wrapped by this class
-	# so this class is responsible to blacklist or whitelist the connection
-	# in case there is error
-    }
-
-    class Makara__Strategies__Abstract {
-    	<<abstract>>
-        pool
-        init()
-	connection_added()
-	current()
-	next()
-    }
-
-    class Makara__Pool {
-    	# by using Makara, we can use many replica databases
-	# to manage those databases, we need to use pooling feature
-	# so it is easier to manage
-	# each connection that available on the pool is an instance of Makara__ConnectionWrapper
-    }
-
-    class Makara__Context {
-    	# uses Ruby Thread to store the current context
-	# for example, we set the current context to use primary db
-	# then all of active_record connection on the current process will use primary db
-    }
-
-
-    class Makara__Proxy {
-        # entry point of the gem
-    }
+  def handle(connection)
+    yield
+  rescue Exception => e
+    case e.class.name
+    when *harsh_errors
+      ###
+    end
+  end
 ```
+
+# Interesting things
+
+it uses underscore prefix for private methods `_xxx`, which is not common for Ruby codes to have _ 
